@@ -3,6 +3,8 @@ let socket = require("socket.io");
 let MongoClient = require('mongodb').MongoClient;
 let url = "mongodb://localhost:27017/mydb";
 
+const client = new MongoClient(url, { useUnifiedTopology: true });
+
 MongoClient.connect(url, function(err, db) {
     if (err) throw err;
     console.log("Database created!");
@@ -52,6 +54,7 @@ io.on("connection", function(socket) {
         if (room != null) {
             rooms.push(room);
             io.sockets.emit("updateRooms", rooms, null);
+
         }
     });
 
