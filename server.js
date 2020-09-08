@@ -1,47 +1,49 @@
 let express = require("express");
 let socket = require("socket.io");
 let MongoClient = require('mongodb').MongoClient;
-let url = "mongodb://localhost:27017/mydb";
+let url = "mongodb://localhost:27017/chat";
 
 const client = new MongoClient(url, { useUnifiedTopology: true });
 
 
-// MongoClient.connect(url, { useUnifiedTopology: true },function(err, db) {   //here db is the client obj
-//     if (err) throw err;
-//     let dbase = db.db("mydb"); //here
-//
-//     let allCollections = [];
-//
-//     dbase.listCollections().toArray(function(err, collections) {
-//         if(err) console.log(err);
-//         //iterate to each collection detail and push just name in array
-//         collections.forEach(eachCollectionDetails => {
-//             allCollections.push(eachCollectionDetails.name);
-//         });
-//         //close client
-//         // client.close();
-//     });
-//
-//     console.log(allCollections);
-//
-//     if (!allCollections.includes("chats")) {
-//
-//         dbase.createCollection("chats", function (err, res) {
-//             if (err) throw err;
-//             console.log("Chats database created!");
-//             db.close();   //close method has also been moved to client obj
-//         });
-//     }else{
-//         console.log("Chats database found.");
-//     }
-// });
+MongoClient.connect(url, { useUnifiedTopology: true },function(err, db) {   //here db is the client obj
+    if (err) throw err;
+
+    db.auth('chat_admin', 'chat_password')
+    let dbase = db.db("chat"); //here
+
+    let allCollections = [];
+
+    dbase.listCollections().toArray(function(err, collections) {
+        if(err) console.log(err);
+        //iterate to each collection detail and push just name in array
+        collections.forEach(eachCollectionDetails => {
+            allCollections.push(eachCollectionDetails.name);
+        });
+        //close client
+        // client.close();
+    });
+
+    console.log(allCollections);
+
+    // if (!allCollections.includes("chats")) {
+    //
+    //     dbase.createCollection("chats", function (err, res) {
+    //         if (err) throw err;
+    //         console.log("Chats database created!");
+    //         db.close();   //close method has also been moved to client obj
+    //     });
+    // }else{
+    //     console.log("Chats database found.");
+    // }
+});
 
 let app = express();
 
 app.use(express.static("public"));
 
-let server = app.listen(5000, function() {
-    console.log("Listening to port 5000.");
+let server = app.listen(3456, function() {
+    console.log("Listening to port 3456.");
 });
 
 let io = socket(server);
@@ -72,6 +74,16 @@ io.on("connection", function(socket) {
         io.sockets
             .to(socket.currentRoom)
             .emit("updateChat", socket.username, data);
+
+        db.collection('chat').insertOne(doc, function (error, response) {
+            if(error) {
+                console.log('Error occurred while inserting');
+                // return
+            } else {
+                console.log('inserted record', response.ops[0]);
+                // return
+            }
+        });
     });
 
 
