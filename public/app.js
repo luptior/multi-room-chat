@@ -1,4 +1,4 @@
-var socket = io.connect("http://localhost:5000");
+var socket = io.connect("http://localhost:3456");
 
 var userlist = document.getElementById("userlist");
 var roomlist = document.getElementById("roomlist");
